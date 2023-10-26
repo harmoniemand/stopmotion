@@ -3,10 +3,11 @@
         <div class="reel-header">
             <span>{{ image_count }} Bilder</span>
         </div>
-        <div class="reel-image" v-for="(image) in images_reversed" :key="image.Id" @click="selectedId = selectedId == image.Id ? '' : image.Id" :class="{ selected: image.Id == selectedId}">
+        <div class="reel-image" v-for="(image) in images_reversed" :key="image.Id"
+            @click="selectedId = selectedId == image.Id ? '' : image.Id" :class="{ selected: image.Id == selectedId }">
             <img :src="image.BASE64" />
             <div class="reel-image-toolbox">
-                <button class="btn" @click="deleteImage(image)">Löschen</button>
+                <Button icon="pi pi-trash" label="Bild Löschen" @click="deleteImage(image)" />
             </div>
         </div>
     </div>
@@ -20,6 +21,9 @@ import { ref, computed, watch } from 'vue'
 import Image from '../types/Image';
 
 import ImageService from '../services/image.service';
+
+import Button from 'primevue/button';
+
 
 const imageService: ImageService = ImageService.getInstance()
 
@@ -54,7 +58,7 @@ const image_count = computed(() => {
 <style scoped>
 .reel {
     width: 100%;
-    height: calc(100vh - 46px);
+    height: 100%;
     overflow: scroll;
     margin-left: 10px;
     margin-right: 10px;
@@ -79,16 +83,17 @@ const image_count = computed(() => {
     display: none;
     width: 100%;
 
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
 }
+
 .reel .reel-image.selected .reel-image-toolbox {
     display: block;
 }
+
 .reel .reel-image .reel-image-toolbox .btn {
     border: solid 1px hsla(160, 100%, 37%, 1);
     height: 42px;
     padding: 0px 45px;
     font-size: 20px;
 }
-
 </style>

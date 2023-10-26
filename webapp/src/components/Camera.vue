@@ -21,10 +21,12 @@
 import Image from '../types/Image';
 import { ref, onMounted } from 'vue'
 import CameraService from './../services/camera.service'
+import ImageService from './../services/image.service'
 import CameraEvent from '../Events/CameraEvent';
 
 
-const cameraService: CameraService = CameraService.getInstance()
+const cameraService = CameraService.getInstance()
+const imageService = ImageService.getInstance()
 
 const imgWidth = 800
 const imgHeight = 600
@@ -32,7 +34,8 @@ const imgHeight = 600
 const error = ref(false)
 const camera = ref<HTMLVideoElement | null>(null)
 
-const lastImage = ref<Image | null>(null)
+
+const lastImage = ref<Image | null>(imageService.Images.value.length > 0 ? imageService.Images.value[imageService.Images.value.length - 1] : null)
 
 onMounted(() => {
   startCameraStream()

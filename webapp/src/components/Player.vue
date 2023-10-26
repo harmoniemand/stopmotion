@@ -15,7 +15,7 @@
   
 
   const imageService = ImageService.getInstance()
-  const fps = ref(60);
+  const fps = ref(10);
 
   const images = imageService.Images
   const currentImage = ref(0)

@@ -1,28 +1,21 @@
 <template>
-  <div class="app-container">
-    <Navigation />
+  <ConfirmDialog></ConfirmDialog>
 
-    <div class="content-container" v-if="state?.SessionId != ''">
-      <div class="content-container-item left">
-        <Camera v-if="showCamera" />
-        <Player v-if="showPlayer" />
 
-        <div class="camera-controls">
-          <button class="btn" @click="onButtonTakeImagePressed">Bild aufnehmen</button>
-          <button class="btn" @click="onButtonPlayPressed">
-            <span v-if="!showPlayer">Video Abspielen</span>
-            <span v-if="showPlayer">Video Stoppen</span>
-
-            </button>
-        </div>
-      </div>
-      <div class="content-container-item right">
-        <Reel :images="images" />
-      </div>
+  <div class="grid nested-grid h-screen" @dblclick="stopDblClick">
+    <div class="col-12">
+      <Navigation @onPlayButtonPressed="onButtonPlayPressed" @onTakeImageButtonPressed="onButtonTakeImagePressed"  @onNewButtonPressed="onNewButtonPressed"/>
+    </div>
+    <div class="col-9 flex h-full" style="max-height: calc(100% - 84px) !important;">
+          <Camera v-if="showCamera" />
+          <Player v-if="showPlayer" />
+    </div>
+    <div class="col-3 h-full" style="max-height: calc(100% - 84px) !important;">
+      <Reel :images="images" />
     </div>
   </div>
 
-  <ModalNewProjekt v-if="state?.SessionId == ''" @ready="NewProjectReady" />
+  <ModalNewProjekt v-if="state?.SessionId == ''" @ready="NewProjectReady"  @dblclick="stopDblClick" />
 </template>
 
 
@@ -36,6 +29,9 @@ import ImageService from './services/image.service'
 
 import { ref, watch } from 'vue'
 
+import ConfirmDialog from 'primevue/confirmdialog';
+import { useConfirm } from "primevue/useconfirm";
+
 import Navigation from './components/Navigation.vue'
 import Camera from './components/Camera.vue'
 import Reel from './components/Reel.vue'
@@ -47,7 +43,9 @@ const showCamera = ref(true)
 const showPlayer = ref(false)
 
 const cameraService: CameraService = CameraService.getInstance()
-const imageService: ImageService = ImageService.getInstance()
+ImageService.getInstance()
+
+
 
 const state = ref<AppState>()
 const storageState = localStorage.getItem('vue_app_state')
@@ -92,8 +90,37 @@ const onButtonTakeImagePressed = () => {
   cameraService.TakePhoto()
 }
 
+const onNewButtonPressed = () => {
+  console.debug("button new pressed")
 
+  confirm1()
+  // state.value = new AppState(null)
+  // showCamera.value = true
+  // showPlayer.value = false
+}
 
+const confirm = useConfirm();
+
+const confirm1 = () => {
+    confirm.require({
+        message: 'Wenn du ein neues Projekt anlegst, wird dein aktuelles Projekt gelöscht. Bist du sicher?',
+        header: 'Neues Projekt',
+        icon: 'pi pi-exclamation-triangle',
+        accept: () => {
+          console.log('accept')
+          localStorage.clear()
+          window.location.reload()          
+        },
+        reject: () => {
+          console.log('reject')
+        }
+    });
+};
+
+const stopDblClick = (e: any) => {
+  e.preventDefault()
+  e.stopPropagation()
+}
 
 </script>
 
@@ -142,17 +169,6 @@ const onButtonTakeImagePressed = () => {
   align-items: center;
 }
 
-.camera-controls .btn {
-    border: solid 1px hsla(160, 100%, 37%, 1);
-  /* border: solid 1px hsla(17, 100%, 37%, 1); */
-  background-color: hsla(160, 100%, 37%, 0.2);
-  color: hsla(160, 100%, 37%, 1);
-
-  height: 42px;
-  padding: 0px 45px;
-  font-size: 20px;
-  margin: 0px 10px;
-}
 
 
 .overlay {
@@ -174,5 +190,9 @@ const onButtonTakeImagePressed = () => {
   width: 50vw;
 
   background-color: white;
+}
+
+.camera-controls Button {
+  margin: 0 10px;
 }
 </style>

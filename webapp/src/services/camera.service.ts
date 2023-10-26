@@ -2,6 +2,7 @@ import Image from "../types/Image";
 import CameraEvent from "../Events/CameraEvent";
 
 
+
 class CameraService extends EventTarget {
 
     private static instance: CameraService;
