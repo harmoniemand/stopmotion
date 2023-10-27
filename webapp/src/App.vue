@@ -24,8 +24,8 @@
 import AppState from './types/AppState';
 import Image from './types/Image';
 
-import CameraService from './services/camera.service'
-import ImageService from './services/image.service'
+import { useCameraStore } from './stores/camera-store';
+import { useImageStore } from './stores/image-store';
 
 import { ref, watch } from 'vue'
 
@@ -42,9 +42,8 @@ const images = ref<Image[]>([])
 const showCamera = ref(true)
 const showPlayer = ref(false)
 
-const cameraService: CameraService = CameraService.getInstance()
-ImageService.getInstance()
-
+const cameraStore = useCameraStore()
+const imageStore = useImageStore()
 
 
 const state = ref<AppState>()
@@ -87,7 +86,9 @@ const onButtonPlayPressed = () => {
 
 const onButtonTakeImagePressed = () => {
   console.debug("button take image pressed")
-  cameraService.TakePhoto()
+  const image = cameraStore.TakePhoto()
+  imageStore.addImage(image)
+
 }
 
 const onNewButtonPressed = () => {

@@ -17,38 +17,29 @@
 
 <script setup lang="ts">
 
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import Image from '../types/Image';
 
-import ImageService from '../services/image.service';
+import { useImageStore } from '../stores/image-store';
 
 import Button from 'primevue/button';
 
 
-const imageService: ImageService = ImageService.getInstance()
-
-const images = imageService.Images
-
-// const props = defineProps({ images: { type: Array as () => Image[], required: true } })
+const imageStore = useImageStore()
 
 const selectedId = ref<string | null>(null)
 
 
 const deleteImage = (image: Image) => {
-    imageService.Delete(image)
+    imageStore.removeImage(image)
 }
 
-
-watch(images, (newImages) => {
-    console.log('images changed', newImages)
-})
-
 const images_reversed = computed(() => {
-    return images.value.slice().reverse();
+    return imageStore.reversedImages
 })
 
 const image_count = computed(() => {
-    return images.value.length;
+    return imageStore.images.length
 })
 
 </script>

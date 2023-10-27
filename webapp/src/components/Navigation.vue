@@ -24,28 +24,17 @@
 
 import Menubar from 'primevue/menubar';
 import { ref, defineEmits, computed } from 'vue'
-import ImageService from '../services/image.service';
+import { useImageStore } from '../stores/image-store';
 
 
-const imageService: ImageService = ImageService.getInstance()
+const imageStore = useImageStore()
 
-const items = ref([
-    {
-        label: 'Upload',
-        icon: 'pi pi-fw pi-upload',
-        route: '/fileupload'
-    },
-    {
-        label: 'Quit',
-        icon: 'pi pi-fw pi-power-off'
-    }
-]);
 const emit = defineEmits(['onPlayButtonPressed', 'onTakeImageButtonPressed', 'onNewButtonPressed'])
 
 const showPlayer = ref(false)
 
 const hasImages = computed(() => {
-    return imageService.Images.value.length > 0
+    return imageStore.images.length > 0
 })
 
 const onButtonNewPressed = () => {
@@ -59,10 +48,19 @@ const onButtonPlayPressed = () => {
     emit('onPlayButtonPressed')
 }
 
+const takeImages = ref(false)
+
 const onButtonTakeImagePressed = () => {
     console.debug("button take image pressed")
-    emit('onTakeImageButtonPressed')
+    // emit('onTakeImageButtonPressed')
+    takeImages.value = !takeImages.value
 }
+
+setInterval(() => {
+    if (takeImages.value) {
+        emit('onTakeImageButtonPressed')
+    }
+}, 100)
 
 </script>
 

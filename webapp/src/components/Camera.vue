@@ -18,24 +18,21 @@
 
 <script setup lang="ts">
 
-import Image from '../types/Image';
-import { ref, onMounted } from 'vue'
-import CameraService from './../services/camera.service'
-import ImageService from './../services/image.service'
-import CameraEvent from '../Events/CameraEvent';
+import { ref, onMounted, computed } from 'vue'
+import { useCameraStore } from '../stores/camera-store'
+import { useImageStore } from '../stores/image-store'
 
+const cameraStore = useCameraStore()
+const imageStore = useImageStore()
 
-const cameraService = CameraService.getInstance()
-const imageService = ImageService.getInstance()
 
 const imgWidth = 800
 const imgHeight = 600
 
-const error = ref(false)
 const camera = ref<HTMLVideoElement | null>(null)
 
 
-const lastImage = ref<Image | null>(imageService.Images.value.length > 0 ? imageService.Images.value[imageService.Images.value.length - 1] : null)
+// const lastImage = ref<Image | null>(imageStore.images.length > 0 ? imageStore.images[imageStore.images.length - 1] : null)
 
 onMounted(() => {
   startCameraStream()
@@ -43,23 +40,18 @@ onMounted(() => {
 
 const startCameraStream = () => {
   if (camera && camera.value) {
-    cameraService.StartCameraStream(camera.value)
+    cameraStore.StartCameraStream(camera.value)
   }
 }
 
-const onCameraImage = (e: any) => {
-  console.log('onCameraImage', e)
-  const img = (e as CameraEvent).Image;
-  lastImage.value = img
-}
-cameraService.addEventListener('onNewImage', onCameraImage)
+const lastImage = computed(() => {
+  return imageStore.lastImage
+})
 
-const onCameraError = () => {
-  error.value = cameraService.HasError
-}
 
-cameraService.addEventListener('onCameraError', onCameraError)
-
+const error = computed(() => {
+  return cameraStore.HasError
+})
 
 </script>
 
