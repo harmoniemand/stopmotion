@@ -48,19 +48,10 @@ const onButtonPlayPressed = () => {
     emit('onPlayButtonPressed')
 }
 
-const takeImages = ref(false)
-
 const onButtonTakeImagePressed = () => {
     console.debug("button take image pressed")
-    // emit('onTakeImageButtonPressed')
-    takeImages.value = !takeImages.value
+    emit('onTakeImageButtonPressed')
 }
-
-setInterval(() => {
-    if (takeImages.value) {
-        emit('onTakeImageButtonPressed')
-    }
-}, 100)
 
 </script>
 
