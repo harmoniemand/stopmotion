@@ -57,6 +57,8 @@ func main() {
 		DatabaseName: getenvStr("DBNAME", "stopmotion"),
 	}
 
+	log.Debugf("Config: %v", config)
+
 	if strings.ToLower(config.LogLevel) == "debug" {
 		log.SetLevel(log.DebugLevel)
 	} else {
