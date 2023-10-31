@@ -1,30 +1,36 @@
-import { defineStore } from "pinia"
-import { ref } from "vue"
 import Project from "../types/Project"
-import { computed } from "@vue/reactivity"
 import Image from "../types/Image"
 import axios from "axios"
+import { ref } from "vue";
 
-export const useProjectStore = defineStore('project', () => {
-    console.log("creating project store")
 
-    // const baseURL = "http://localhost:8080"
-    const baseURL = "https://stopmotion.sfzprojekt.de"
+class ProjectStore {
 
-    const project = ref<Project | null>(null)
+    private static instance: ProjectStore;
 
-    const hasImages = computed(() => {
-        if (project.value == null) return false
 
-        return project.value?.images.length > 0
-    })
+    baseURL = "http://localhost:8080"
+    // baseURL = "https://stopmotion.sfzprojekt.de"
+    Project = ref<Project | null>(null)
 
-    const AddImage = (image: Image) => {
-        if (project.value == null) {
+    private constructor() {
+        console.log("creating project store")
+    }
+
+    public static getInstance(): ProjectStore {
+        if (!ProjectStore.instance) {
+            ProjectStore.instance = new ProjectStore();
+        }
+
+        return ProjectStore.instance;
+    }
+
+    AddImage(image: Image) {
+        if (this.Project.value == null) {
             return
         }
 
-        project.value.images.push(image)
+        this.Project.value.images.push(image)
 
 
         const splitDataURI = image.data.split(',')
@@ -38,33 +44,55 @@ export const useProjectStore = defineStore('project', () => {
         let b = new Blob([ia], { type: mimeString })
 
         let formData = new FormData();
-        formData.append("project_id", project.value.id);
+        formData.append("project_id", this.Project.value.id);
         formData.append("id", image.Id);
         formData.append("image", b, image.Id + ".png");
 
 
-        axios.post(baseURL + '/api/v1/images', formData, {
+        axios.post(this.baseURL + '/api/v1/images', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         });
     }
 
-    const RemoveImage = (image: Image) => {
-        if (project.value == null) {
+    RemoveImage(image: Image) {
+        if (this.Project.value == null) {
             return
         }
 
-        project.value.images = project.value.images.filter(i => i != image)
+        this.Project.value.images = this.Project.value.images.filter(i => i != image)
     }
 
-    function LoadImageAsBase64(pid: string, iid: string) {
+    LoadProject() {
+        console.log("looking for project_id")
+        const project_id = localStorage.getItem('project_id')
+
+        if (project_id) {
+            console.log("project_id found, fetching project data", project_id)
+            fetch(this.baseURL + '/api/v1/projects/' + project_id)
+                .then(response => response.json())
+                .then(data => {
+                    this.Project.value = new Project(data)
+                    console.log("project data fetched", this.Project)
+
+                    this.Project.value.images.forEach(i => {
+                        this.LoadImageAsBase64(project_id, i.Id)
+                    })
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        }
+    }
+
+    LoadImageAsBase64(pid: string, iid: string) {
         console.log("loading image", pid, iid)
 
         let img = document.createElement('img');
-        img.src = baseURL + '/api/v1/images/' + pid + '/' + iid;
+        img.src = this.baseURL + '/api/v1/images/' + pid + '/' + iid;
         img.crossOrigin = "anonymous"
-        img.onload = function () {
+        img.onload = () => {
             let canvas = document.createElement('canvas');
             canvas.width = img.width;
             canvas.height = img.height;
@@ -74,48 +102,22 @@ export const useProjectStore = defineStore('project', () => {
 
             let dataURL = canvas.toDataURL('image/png');
 
-            // let image = new Image({id: iid, data: dataURL})
-            // console.log("image loaded", image)
+            if (this.Project.value == null) {
+                console.warn("project not found")
+                return
+            }
 
-            let i = project.value?.images.findIndex(i => i.Id == iid)
+            let i = this.Project.value.images.findIndex(i => i.Id == iid)
             if (i == undefined) {
                 console.warn("image not found", iid)
                 return
             }
 
-            if (project.value == null) {
-                console.warn("project not found")
-                return
-            }
-
-            project.value.images[i].data = dataURL
+            this.Project.value.images[i].data = dataURL
         };
-
     }
 
-    function LoadProject() {
-        console.log("looking for project_id")
-        const project_id = localStorage.getItem('project_id')
-
-        if (project_id) {
-            console.log("project_id found, fetching project data", project_id)
-            fetch(baseURL + '/api/v1/projects/' + project_id)
-                .then(response => response.json())
-                .then(data => {
-                    project.value = new Project(data)
-                    console.log("project data fetched", project.value)
-
-                    project.value.images.forEach(i => {
-                        LoadImageAsBase64(project_id, i.Id)
-                    })
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-        }
-    }
-
-    function CreateProject(p: Project) {
+    CreateProject(p: Project) {
 
         const requestOptions = {
             method: 'POST',
@@ -123,24 +125,17 @@ export const useProjectStore = defineStore('project', () => {
             body: JSON.stringify(p)
         };
 
-        fetch(baseURL + '/api/v1/projects', requestOptions)
+        fetch(this.baseURL + '/api/v1/projects', requestOptions)
             .then(response => response.json())
             .then(data => {
-                project.value = new Project(data)
+                this.Project.value = new Project(data)
                 localStorage.setItem('project_id', data.id)
             })
             .catch(error => {
                 console.log(error)
             })
     }
+}
 
-    return {
-        project,
-        hasImages,
-        LoadProject,
-        CreateProject,
-        AddImage,
-        RemoveImage
 
-    }
-})
+export default ProjectStore

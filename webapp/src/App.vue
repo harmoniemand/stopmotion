@@ -8,15 +8,15 @@
         @onNewButtonPressed="onNewButtonPressed" />
     </div>
     <div class="col-9 flex h-full" style="max-height: calc(100% - 84px) !important;">
-      <Camera v-if="showCamera && project" :lastImage="project.images[0]" />
-      <Player v-if="showPlayer && project" :images="project.images" />
+      <Camera v-if="showCamera && projectStore.Project.value" :lastImage="projectStore.Project.value.images[0]" />
+      <Player v-if="showPlayer && projectStore.Project.value" :images="projectStore.Project.value.images" />
     </div>
     <div class="col-3 h-full" style="max-height: calc(100% - 84px) !important;">
-      <Reel v-if="project" :images="project.images" />
+      <Reel v-if="projectStore.Project.value" :images="projectStore.Project.value.images" />
     </div>
   </div>
 
-  <ModalNewProjekt v-if="project == null" @ready="NewProjectReady" @dblclick="stopDblClick" />
+  <ModalNewProjekt v-if="projectStore.Project.value == null" @ready="NewProjectReady" @dblclick="stopDblClick" />
 </template>
 
 
@@ -25,7 +25,7 @@
 import Project from './types/Project';
 
 import { useCameraStore } from './stores/camera-store';
-import { useProjectStore } from './stores/project-store';
+import ProjectStore from './stores/project-store';
 
 import { ref } from 'vue'
 
@@ -39,16 +39,11 @@ import ModalNewProjekt from './components/ModalNewProjekt.vue';
 import Player from './components/Player.vue';
 import { Guid } from 'guid-typescript';
 
-const project = ref<Project | null>(null)
 const showCamera = ref(true)
 const showPlayer = ref(false)
 
 const cameraStore = useCameraStore()
-const projectStore = useProjectStore()
-
-projectStore.$subscribe((_, state) => {
-  project.value = state.project
-})
+const projectStore = ProjectStore.getInstance()
 
 projectStore.LoadProject()
 

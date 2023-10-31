@@ -24,17 +24,17 @@
 
 import Menubar from 'primevue/menubar';
 import { ref, computed } from 'vue'
-import { useProjectStore } from '../stores/project-store';
+import ProjectStore from '../stores/project-store';
 
-
-const projectStore = useProjectStore()
+const projectStore = ProjectStore.getInstance()
 
 const emit = defineEmits(['onPlayButtonPressed', 'onTakeImageButtonPressed', 'onNewButtonPressed'])
 
 const showPlayer = ref(false)
 
 const hasImages = computed(() => {
-    return projectStore.hasImages
+    if (projectStore.Project.value == null) return false
+    return projectStore.Project.value?.images.length > 0
 })
 
 const onButtonNewPressed = () => {
