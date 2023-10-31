@@ -1,5 +1,3 @@
-import Project from "./Project";
-
 class AppState {
     ProjectId: string = "";
 

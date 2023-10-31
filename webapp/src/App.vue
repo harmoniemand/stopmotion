@@ -46,7 +46,7 @@ const showPlayer = ref(false)
 const cameraStore = useCameraStore()
 const projectStore = useProjectStore()
 
-projectStore.$subscribe((mutation, state) => {
+projectStore.$subscribe((_, state) => {
   project.value = state.project
 })
 

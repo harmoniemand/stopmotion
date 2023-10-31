@@ -8,8 +8,8 @@ import axios from "axios"
 export const useProjectStore = defineStore('project', () => {
     console.log("creating project store")
 
-    const baseURL = "http://localhost:8080"
-    // const baseURL = "https://stopmotion.sfzprojekt.de"
+    // const baseURL = "http://localhost:8080"
+    const baseURL = "https://stopmotion.sfzprojekt.de"
 
     const project = ref<Project | null>(null)
 
@@ -17,9 +17,6 @@ export const useProjectStore = defineStore('project', () => {
         if (project.value == null) return false
 
         return project.value?.images.length > 0
-    })
-    const lastImage = computed(() => {
-        return project.value?.images.slice().reverse()[0]
     })
 
     const AddImage = (image: Image) => {
