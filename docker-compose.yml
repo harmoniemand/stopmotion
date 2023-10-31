@@ -81,23 +81,23 @@ services:
         max-size: "100k"
     depends_on:
       - stopmotion_api
-    ports:
-      - 8080:80
+    # ports:
+    #   - 8080:80
     networks:
       - traefik_net
       - backend
     labels:
         - traefik.enable=true
         - traefik.docker.network=traefik_net
-        - traefik.http.routers.stopmotion_api.entrypoints=http
-        - traefik.http.routers.stopmotion_api.rule=Host("${DOMAIN}")
-        - traefik.http.middlewares.stopmotion_api-https-redirect.redirectscheme.scheme=https
-        - traefik.http.routers.stopmotion_api.middlewares=stopmotion_api-https-redirect
-        - traefik.http.routers.stopmotion_api-secure.entrypoints=https
-        - traefik.http.routers.stopmotion_api-secure.rule=Host("${DOMAIN}")
-        - traefik.http.routers.stopmotion_api-secure.tls=true
-        - traefik.http.routers.stopmotion_api-secure.tls.certresolver=http
-        - traefik.http.routers.stopmotion_api-secure.service=stopmotion_api
-        - traefik.http.services.stopmotion_api.loadbalancer.server.port=80
+        - traefik.http.routers.stopmotion_app.entrypoints=http
+        - traefik.http.routers.stopmotion_app.rule=Host("${DOMAIN}")
+        - traefik.http.middlewares.stopmotion_app-https-redirect.redirectscheme.scheme=https
+        - traefik.http.routers.stopmotion_app.middlewares=stopmotion_app-https-redirect
+        - traefik.http.routers.stopmotion_app-secure.entrypoints=https
+        - traefik.http.routers.stopmotion_app-secure.rule=Host("${DOMAIN}")
+        - traefik.http.routers.stopmotion_app-secure.tls=true
+        - traefik.http.routers.stopmotion_app-secure.tls.certresolver=http
+        - traefik.http.routers.stopmotion_app-secure.service=stopmotion_app
+        - traefik.http.services.stopmotion_app.loadbalancer.server.port=80
 
 
