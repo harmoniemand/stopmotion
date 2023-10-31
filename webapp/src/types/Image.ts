@@ -1,12 +1,14 @@
 import { Guid } from "guid-typescript";
 
 class Image {
-    BASE64: string = "";
+    data: string = "";
+    created_at: string = "";
     Id: string = "";
 
-    constructor(b64: string, id: string  = '' ) {
-        this.Id = id === "" ? Guid.create().toString() : id;
-        this.BASE64 = b64;        
+    constructor(img: any) {
+        this.Id = img.id === "" ? Guid.create().toString() : img.id;
+        this.data = img.data;
+        this.created_at = img.created_at;
     }
 
 }

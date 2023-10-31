@@ -4,30 +4,30 @@
 
   <div class="grid nested-grid h-screen" @dblclick="stopDblClick">
     <div class="col-12">
-      <Navigation @onPlayButtonPressed="onButtonPlayPressed" @onTakeImageButtonPressed="onButtonTakeImagePressed"  @onNewButtonPressed="onNewButtonPressed"/>
+      <Navigation @onPlayButtonPressed="onButtonPlayPressed" @onTakeImageButtonPressed="onButtonTakeImagePressed"
+        @onNewButtonPressed="onNewButtonPressed" />
     </div>
     <div class="col-9 flex h-full" style="max-height: calc(100% - 84px) !important;">
-          <Camera v-if="showCamera" />
-          <Player v-if="showPlayer" />
+      <Camera v-if="showCamera && project" :lastImage="project.images[0]" />
+      <Player v-if="showPlayer && project" :images="project.images" />
     </div>
     <div class="col-3 h-full" style="max-height: calc(100% - 84px) !important;">
-      <Reel :images="images" />
+      <Reel v-if="project" :images="project.images" />
     </div>
   </div>
 
-  <ModalNewProjekt v-if="state?.SessionId == ''" @ready="NewProjectReady"  @dblclick="stopDblClick" />
+  <ModalNewProjekt v-if="project == null" @ready="NewProjectReady" @dblclick="stopDblClick" />
 </template>
 
 
 <script setup lang="ts">
 
-import AppState from './types/AppState';
-import Image from './types/Image';
+import Project from './types/Project';
 
 import { useCameraStore } from './stores/camera-store';
-import { useImageStore } from './stores/image-store';
+import { useProjectStore } from './stores/project-store';
 
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
@@ -37,45 +37,51 @@ import Camera from './components/Camera.vue'
 import Reel from './components/Reel.vue'
 import ModalNewProjekt from './components/ModalNewProjekt.vue';
 import Player from './components/Player.vue';
+import { Guid } from 'guid-typescript';
 
-const images = ref<Image[]>([])
+const project = ref<Project | null>(null)
 const showCamera = ref(true)
 const showPlayer = ref(false)
 
 const cameraStore = useCameraStore()
-const imageStore = useImageStore()
+const projectStore = useProjectStore()
 
-
-const state = ref<AppState>()
-const storageState = localStorage.getItem('vue_app_state')
-if (storageState) {
-  state.value = JSON.parse(storageState)
-} else {
-  state.value = new AppState(null)
-}
-
-watch(state, (newState) => {
-  console.log('state changed', newState)
-  localStorage.setItem('vue_app_state', JSON.stringify(newState))
+projectStore.$subscribe((mutation, state) => {
+  project.value = state.project
 })
 
-watch(images, (newImages) => {
-  console.log('images changed', newImages)
-})
-
-
+projectStore.LoadProject()
 
 
 const NewProjectReady = (e: any) => {
   // state.value.SessionId = '123'
   console.log('NewProjectReady', e)
 
-  state.value = new AppState({
-    sessionId: '123',
+  projectStore.CreateProject(new Project({
+    id: Guid.create().toString(),
     name: e.name,
     description: e.description,
-    authors: e.authors
-  })
+    authors: e.authors,
+    images: [],
+  }))
+}
+
+const leadingZero = (num: number, size: number) => {
+  let s = num + "";
+  while (s.length < size) s = "0" + s;
+  return s;
+}
+
+const getDateString = () => {
+  let d = new Date()
+  let dStr = d.getFullYear() + '-'
+  dStr += leadingZero((d.getMonth() + 1), 2) + '-'
+  dStr += leadingZero(d.getDate(), 2) + ' '
+  dStr += leadingZero(d.getHours(), 2) + ':'
+  dStr += leadingZero(d.getMinutes(), 2) + ':'
+  dStr += leadingZero(d.getSeconds(), 2)
+
+  return dStr
 }
 
 const onButtonPlayPressed = () => {
@@ -87,35 +93,32 @@ const onButtonPlayPressed = () => {
 const onButtonTakeImagePressed = () => {
   console.debug("button take image pressed")
   const image = cameraStore.TakePhoto()
-  imageStore.addImage(image)
+  image.created_at = getDateString()
+  projectStore.AddImage(image)
 
 }
 
 const onNewButtonPressed = () => {
   console.debug("button new pressed")
-
   confirm1()
-  // state.value = new AppState(null)
-  // showCamera.value = true
-  // showPlayer.value = false
 }
 
 const confirm = useConfirm();
 
 const confirm1 = () => {
-    confirm.require({
-        message: 'Wenn du ein neues Projekt anlegst, wird dein aktuelles Projekt gelöscht. Bist du sicher?',
-        header: 'Neues Projekt',
-        icon: 'pi pi-exclamation-triangle',
-        accept: () => {
-          console.log('accept')
-          localStorage.clear()
-          window.location.reload()          
-        },
-        reject: () => {
-          console.log('reject')
-        }
-    });
+  confirm.require({
+    message: 'Wenn du ein neues Projekt anlegst, wird dein aktuelles Projekt gelöscht. Bist du sicher?',
+    header: 'Neues Projekt',
+    icon: 'pi pi-exclamation-triangle',
+    accept: () => {
+      console.log('accept')
+      localStorage.clear()
+      window.location.reload()
+    },
+    reject: () => {
+      console.log('reject')
+    }
+  });
 };
 
 const stopDblClick = (e: any) => {

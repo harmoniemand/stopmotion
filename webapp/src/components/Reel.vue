@@ -1,49 +1,57 @@
+<script setup lang="ts">
+
+import { ref, computed, PropType } from 'vue'
+import Image from '../types/Image';
+import Button from 'primevue/button';
+
+const props = defineProps({
+    images: {
+        type: Array as PropType<Image[]>,
+        required: true
+    }
+})
+
+const $emit = defineEmits(['delete'])
+
+const selectedId = ref<string | null>(null)
+
+
+const imagesSorted = computed(() => {
+    return props.images.sort((a, b) => {
+        if (a.created_at > b.created_at) {
+            return -1
+        }
+        if (a.created_at < b.created_at) {
+            return 1
+        }
+        return 0
+    })
+})
+
+const image_count = computed(() => {
+    return props.images.length
+})
+
+const deleteImage = (image: Image) => {
+    $emit('delete', image)
+}
+</script>
+
+
 <template>
     <div class="reel">
         <div class="reel-header">
             <span>{{ image_count }} Bilder</span>
         </div>
-        <div class="reel-image" v-for="(image) in images_reversed" :key="image.Id"
+        <div class="reel-image" v-for="(image) in imagesSorted" :key="image.Id"
             @click="selectedId = selectedId == image.Id ? '' : image.Id" :class="{ selected: image.Id == selectedId }">
-            <img :src="image.BASE64" />
+            <img :src="image.data" />
             <div class="reel-image-toolbox">
                 <Button icon="pi pi-trash" label="Bild Löschen" @click="deleteImage(image)" />
             </div>
         </div>
     </div>
 </template>
-
-
-
-<script setup lang="ts">
-
-import { ref, computed } from 'vue'
-import Image from '../types/Image';
-
-import { useImageStore } from '../stores/image-store';
-
-import Button from 'primevue/button';
-
-
-const imageStore = useImageStore()
-
-const selectedId = ref<string | null>(null)
-
-
-const deleteImage = (image: Image) => {
-    imageStore.removeImage(image)
-}
-
-const images_reversed = computed(() => {
-    return imageStore.reversedImages
-})
-
-const image_count = computed(() => {
-    return imageStore.images.length
-})
-
-</script>
-
 
 
 <style scoped>

@@ -12,8 +12,8 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS}
-    # ports:
-    #   - '27017:27017'
+    ports:
+      - '27017:27017'
     volumes:
       - ./_data:/data/db
     networks:
@@ -35,37 +35,37 @@ services:
       - traefik_net
       - backend
 
-  stopmotion_api:
-    container_name: stopmotion_api
-    build: ./server
-    restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "10"
-        max-size: "100k"
-    depends_on:
-      - mongodb
-    networks:
-      - traefik_net
-      - backend
-    environment:
-      MONGODB_SERVER: mongodb
-      MONGODB_PORT: 27017
-      MONGODB_ADMINUSERNAME: ${MONGO_USER}
-      MONGODB_ADMINPASSWORD: ${MONGO_PASS}
-      MONGO_CONNECTION: mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017
-      PORT: 5000
-    labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik_net
-        - traefik.http.routers.stopmotion_api.entrypoints=http
-        - traefik.http.routers.stopmotion_api.rule=Host("stopmotion.sfzprojekt.de")
-        - traefik.http.middlewares.stopmotion_api-https-redirect.redirectscheme.scheme=https
-        - traefik.http.routers.stopmotion_api.middlewares=stopmotion_api-https-redirect
-        - traefik.http.routers.stopmotion_api-secure.entrypoints=https
-        - traefik.http.routers.stopmotion_api-secure.rule=Host("stopmotion.sfzprojekt.de")
-        - traefik.http.routers.stopmotion_api-secure.tls=true
-        - traefik.http.routers.stopmotion_api-secure.tls.certresolver=http
-        - traefik.http.routers.stopmotion_api-secure.service=stopmotion_api
-        - traefik.http.services.stopmotion_api.loadbalancer.server.port=5000
+  # stopmotion_api:
+  #   container_name: stopmotion_api
+  #   build: ./server
+  #   restart: always
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-file: "10"
+  #       max-size: "100k"
+  #   depends_on:
+  #     - mongodb
+  #   networks:
+  #     - traefik_net
+  #     - backend
+  #   environment:
+  #     MONGODB_SERVER: mongodb
+  #     MONGODB_PORT: 27017
+  #     MONGODB_ADMINUSERNAME: ${MONGO_USER}
+  #     MONGODB_ADMINPASSWORD: ${MONGO_PASS}
+  #     MONGO_CONNECTION: mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017
+  #     PORT: 5000
+  #   labels:
+  #       - traefik.enable=true
+  #       - traefik.docker.network=traefik_net
+  #       - traefik.http.routers.stopmotion_api.entrypoints=http
+  #       - traefik.http.routers.stopmotion_api.rule=Host("stopmotion.sfzprojekt.de")
+  #       - traefik.http.middlewares.stopmotion_api-https-redirect.redirectscheme.scheme=https
+  #       - traefik.http.routers.stopmotion_api.middlewares=stopmotion_api-https-redirect
+  #       - traefik.http.routers.stopmotion_api-secure.entrypoints=https
+  #       - traefik.http.routers.stopmotion_api-secure.rule=Host("stopmotion.sfzprojekt.de")
+  #       - traefik.http.routers.stopmotion_api-secure.tls=true
+  #       - traefik.http.routers.stopmotion_api-secure.tls.certresolver=http
+  #       - traefik.http.routers.stopmotion_api-secure.service=stopmotion_api
+  #       - traefik.http.services.stopmotion_api.loadbalancer.server.port=5000

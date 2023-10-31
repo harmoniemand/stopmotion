@@ -3,7 +3,7 @@
     <div class="camera-video">
       <div style="position: relative;">
         <video :style="{ width: imgWidth + 'px', height: imgHeight + 'px' }" ref="camera" autoplay></video>
-        <img v-if="lastImage" :src="lastImage.BASE64" style="opacity: 0.4; position: absolute; top: 0; left: 0;" />
+        <img v-if="lastImage" :src="lastImage.data" style="opacity: 0.4; position: absolute; top: 0; left: 0;" />
       </div>
     </div>
 
@@ -20,10 +20,18 @@
 
 import { ref, onMounted, computed } from 'vue'
 import { useCameraStore } from '../stores/camera-store'
-import { useImageStore } from '../stores/image-store'
+import Image from '../types/Image';
+
+
+defineProps({
+  lastImage: {
+    type: Image,
+    // required: true
+  }
+})
+
 
 const cameraStore = useCameraStore()
-const imageStore = useImageStore()
 
 
 const imgWidth = 800
@@ -43,11 +51,6 @@ const startCameraStream = () => {
     cameraStore.StartCameraStream(camera.value)
   }
 }
-
-const lastImage = computed(() => {
-  return imageStore.lastImage
-})
-
 
 const error = computed(() => {
   return cameraStore.HasError

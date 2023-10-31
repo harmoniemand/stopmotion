@@ -24,33 +24,45 @@ func NewProjectsHandler(projectStore *stores.ProjectStore) *ProjectsHandler {
 }
 
 func (h *ProjectsHandler) GetProjects(w http.ResponseWriter, r *http.Request) {
-
-	models, error := h.ProjectStore.GetAllProjects(r.Context())
-	if error != nil {
+	models, err := h.ProjectStore.GetAllProjects(r.Context())
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		_, e := w.Write([]byte("Internal server error"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
 		return
 	}
 
 	json, err := json.Marshal(models)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		_, e := w.Write([]byte("Internal server error"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
+
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(json)
+	_, err = w.Write(json)
+	if err != nil {
+		log.Errorf("Error writing response: %v", err)
+	}
 }
 
 func (h *ProjectsHandler) GetProject(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	log.Debugf("Getting project with id: %v", id)
 
-	model, error := h.ProjectStore.GetProject(r.Context(), id)
-	if error != nil {
+	model, err := h.ProjectStore.GetProject(r.Context(), id)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		_, e := w.Write([]byte("Internal server error"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
 		return
 	}
 
@@ -59,61 +71,55 @@ func (h *ProjectsHandler) GetProject(w http.ResponseWriter, r *http.Request) {
 	json, err := json.Marshal(model)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		_, e := w.Write([]byte("Internal server error"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(json)
+	_, err = w.Write(json)
+	if err != nil {
+		log.Errorf("Error writing response: %v", err)
+	}
 }
 
 func (h *ProjectsHandler) PostProject(w http.ResponseWriter, r *http.Request) {
-
 	var model models.Project
 	err := json.NewDecoder(r.Body).Decode(&model)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Bad request"))
+		_, e := w.Write([]byte("Bad request"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
 		return
 	}
 
-	new_model, err := h.ProjectStore.InsertProject(r.Context(), model)
+	insertedModel, err := h.ProjectStore.InsertProject(r.Context(), model)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		_, e := w.Write([]byte("Internal server error"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
 		return
 	}
 
-	json, err := json.Marshal(new_model)
+	json, err := json.Marshal(insertedModel)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
+		_, e := w.Write([]byte("Internal server error"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write(json)
-}
-
-func (h *ProjectsHandler) PostImageToProject(w http.ResponseWriter, r *http.Request) {
-
-	var model models.Image
-	err := json.NewDecoder(r.Body).Decode(&model)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Bad request"))
-		return
+	_, e := w.Write(json)
+	if e != nil {
+		log.Errorf("Error writing response: %v", e)
 	}
-
-	id := mux.Vars(r)["id"]
-
-	err = h.ProjectStore.AddImageToProject(r.Context(), id, model)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal server error"))
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("image saved"))
 }

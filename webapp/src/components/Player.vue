@@ -1,36 +1,52 @@
-<template>
-  <div class="camera">
-    <div class="camera-video">
-      <div style="position: relative;">
-        <img :src="images[currentImage].BASE64" />
-      </div>
-    </div>
-  </div>
-</template>
+
   
 <script setup lang="ts">
 
-import { computed, ref } from 'vue'
-import { useImageStore } from '../stores/image-store';
+import { ref, PropType, computed } from 'vue'
+import Image from '../types/Image';
 
-
-const imageStore = useImageStore()
-
-const fps = ref(30);
-const currentImage = ref(0)
-
-const images = computed(() => {
-  return imageStore.images
+const props = defineProps({
+  images: {
+    type: Array as PropType<Image[]>,
+    required: true
+  }
 })
+
+
+const fps = ref(10);
+const currentImage = ref(0)
 
 setInterval(() => {
   currentImage.value++;
-  currentImage.value = currentImage.value % images.value.length;
+  currentImage.value = currentImage.value % props.images.length;
 }, 1000 / fps.value)
 
 
 
+
+const imagesSorted = computed(() => {
+  return props.images.sort((a, b) => {
+    if (a.created_at > b.created_at) {
+      return 1
+    }
+    if (a.created_at < b.created_at) {
+      return -1
+    }
+    return 0
+  })
+})
+
 </script>
+
+<template>
+  <div class="camera">
+    <div class="camera-video">
+      <div style="position: relative;">
+        <img :src="imagesSorted[currentImage].data" />
+      </div>
+    </div>
+  </div>
+</template>
   
 <style scoped>
 .camera {
