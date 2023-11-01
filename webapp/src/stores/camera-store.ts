@@ -1,6 +1,4 @@
 import { defineStore } from "pinia"
-import Image from "../types/Image"
-
 export const useCameraStore = defineStore('camera', {
     state: (): {
         Stream: MediaStream | null,

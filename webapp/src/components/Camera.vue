@@ -3,7 +3,7 @@
     <div class="camera-video">
       <div style="position: relative;">
         <video :style="{ width: imgWidth + 'px', height: imgHeight + 'px' }" ref="camera" autoplay></video>
-        <img v-if="lastImage" :src="lastImage.data" style="opacity: 0.4; position: absolute; top: 0; left: 0;" />
+        <img v-if="lastImage" :src="lastImage.Url" style="opacity: 0.4; position: absolute; top: 0; left: 0;" />
       </div>
     </div>
 
