@@ -24,17 +24,18 @@ setInterval(() => {
 
 
 
-const imagesSorted = computed(() => {
-  return props.images.sort((a, b) => {
-    if (a.CreatedAt > b.CreatedAt) {
-      return 1
-    }
-    if (a.CreatedAt < b.CreatedAt) {
-      return -1
-    }
-    return 0
-  })
-})
+// const imagesSorted = computed(() => {
+//   return props.images
+  // .sort((a, b) => {
+  //   if (a.CreatedAt > b.CreatedAt) {
+  //     return 1
+  //   }
+  //   if (a.CreatedAt < b.CreatedAt) {
+  //     return -1
+  //   }
+  //   return 0
+  // })
+// })
 
 </script>
 
@@ -43,7 +44,7 @@ const imagesSorted = computed(() => {
   <div class="player">
     <div class="player-video">
       <div class="player-container" style="position: relative;">
-        <img class="player-img" v-for="(i, index) in imagesSorted" :src="i.Url"
+        <img class="player-img" v-for="(i, index) in images" :src="i.Url"
           :class="{ visible: index == currentImage }" />
       </div>
     </div>
