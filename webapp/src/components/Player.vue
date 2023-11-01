@@ -2,7 +2,7 @@
   
 <script setup lang="ts">
 
-import { ref, PropType, computed } from 'vue'
+import { ref, PropType } from 'vue'
 import Image from '../types/Image';
 
 const props = defineProps({
