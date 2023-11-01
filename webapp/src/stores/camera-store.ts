@@ -49,7 +49,7 @@ export const useCameraStore = defineStore('camera', {
                 });
         },
 
-        TakePhoto() {
+        TakePhoto() :string {
             console.log("taking photo")
             
             const canvas: any = document.createElement('canvas');
@@ -60,14 +60,7 @@ export const useCameraStore = defineStore('camera', {
                 .drawImage(this.CameraVideoElement, 0, 0, canvas.width, canvas.height);
 
             const data = canvas.toDataURL('image/png');
-
-            console.log("photo taken", data)
-
-            return new Image({
-                id: "",
-                data: data,
-                created_at: "",
-            });
+            return data;
         }
     },
 })

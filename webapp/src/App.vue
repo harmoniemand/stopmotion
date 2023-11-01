@@ -7,12 +7,12 @@
       <Navigation @onPlayButtonPressed="onButtonPlayPressed" @onTakeImageButtonPressed="onButtonTakeImagePressed"
         @onNewButtonPressed="onNewButtonPressed" />
     </div>
-    <div class="col-9 flex h-full" style="max-height: calc(100% - 84px) !important;">
+    <div class="col flex h-full" style="max-height: calc(100% - 84px) !important;">
       <Camera v-if="showCamera && projectStore.Project.value" :lastImage="projectStore.Project.value.images[0]" />
       <Player v-if="showPlayer && projectStore.Project.value" :images="projectStore.Project.value.images" />
     </div>
-    <div class="col-3 h-full" style="max-height: calc(100% - 84px) !important;">
-      <Reel v-if="projectStore.Project.value" :images="projectStore.Project.value.images" />
+    <div class="h-full" style="max-height: calc(100% - 84px) !important;">
+      <Reel v-if="projectStore.Project.value" :images="projectStore.Project.value.images" @delete="onButtonPressedDeleteImage" />
     </div>
   </div>
 
@@ -38,6 +38,7 @@ import Reel from './components/Reel.vue'
 import ModalNewProjekt from './components/ModalNewProjekt.vue';
 import Player from './components/Player.vue';
 import { Guid } from 'guid-typescript';
+import Image from './types/Image';
 
 const showCamera = ref(true)
 const showPlayer = ref(false)
@@ -61,24 +62,6 @@ const NewProjectReady = (e: any) => {
   }))
 }
 
-const leadingZero = (num: number, size: number) => {
-  let s = num + "";
-  while (s.length < size) s = "0" + s;
-  return s;
-}
-
-const getDateString = () => {
-  let d = new Date()
-  let dStr = d.getFullYear() + '-'
-  dStr += leadingZero((d.getMonth() + 1), 2) + '-'
-  dStr += leadingZero(d.getDate(), 2) + ' '
-  dStr += leadingZero(d.getHours(), 2) + ':'
-  dStr += leadingZero(d.getMinutes(), 2) + ':'
-  dStr += leadingZero(d.getSeconds(), 2)
-
-  return dStr
-}
-
 const onButtonPlayPressed = () => {
   console.log('Play')
   showCamera.value = !showCamera.value
@@ -87,15 +70,18 @@ const onButtonPlayPressed = () => {
 
 const onButtonTakeImagePressed = () => {
   console.debug("button take image pressed")
-  const image = cameraStore.TakePhoto()
-  image.created_at = getDateString()
-  projectStore.AddImage(image)
-
+  const imageBase64 = cameraStore.TakePhoto()
+  projectStore.AddImage(imageBase64)
 }
 
 const onNewButtonPressed = () => {
   console.debug("button new pressed")
   confirm1()
+}
+
+const onButtonPressedDeleteImage = (image: Image) => {
+  console.debug("button delete pressed")
+  projectStore.RemoveImage(image)
 }
 
 const confirm = useConfirm();
@@ -148,7 +134,7 @@ const stopDblClick = (e: any) => {
 }
 
 .content-container .content-container-item.left {
-  width: 80%;
+  width: 100%;
   height: 100%;
 
   display: flex;
@@ -156,7 +142,7 @@ const stopDblClick = (e: any) => {
 }
 
 .content-container .content-container-item.right {
-  width: 20%;
+  width: 300px;
   height: 100%;
 }
 

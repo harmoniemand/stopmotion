@@ -2,7 +2,8 @@
 
 import { ref, computed, PropType } from 'vue'
 import Image from '../types/Image';
-import Button from 'primevue/button';
+// import Button from 'primevue/button';
+import Listbox from 'primevue/listbox';
 
 const props = defineProps({
     images: {
@@ -13,15 +14,15 @@ const props = defineProps({
 
 const $emit = defineEmits(['delete'])
 
-const selectedId = ref<string | null>(null)
+const selectedImage = ref<Image | null>(null)
 
 
 const imagesSorted = computed(() => {
     return props.images.sort((a, b) => {
-        if (a.created_at > b.created_at) {
+        if (a.CreatedAt > b.CreatedAt) {
             return -1
         }
-        if (a.created_at < b.created_at) {
+        if (a.CreatedAt < b.CreatedAt) {
             return 1
         }
         return 0
@@ -33,6 +34,7 @@ const image_count = computed(() => {
 })
 
 const deleteImage = (image: Image) => {
+    console.log("deleteImage", image)
     $emit('delete', image)
 }
 </script>
@@ -40,15 +42,23 @@ const deleteImage = (image: Image) => {
 
 <template>
     <div class="reel">
+
         <div class="reel-header">
-            <span>{{ image_count }} Bilder</span>
+            Dein Video besteht aus {{ image_count }} Bildern
         </div>
-        <div class="reel-image" v-for="(image) in imagesSorted" :key="image.Id"
-            @click="selectedId = selectedId == image.Id ? '' : image.Id" :class="{ selected: image.Id == selectedId }">
-            <img :src="image.data" />
-            <div class="reel-image-toolbox">
-                <Button icon="pi pi-trash" label="Bild Löschen" @click="deleteImage(image)" />
-            </div>
+
+        <div class="reel-body">
+            <Listbox v-model="selectedImage" :options="imagesSorted" optionLabel="id" class=""
+                listStyle="width: 100%; height:100%" :virtualScrollerOptions="{ itemSize: 150 }" style="height: 100%;">
+                <template #option="slotProps">
+                    <div class="flex align-items-center" style="position: relative;">
+                        <img :alt="slotProps.option.id" :src="slotProps.option.Url" style="width: 200px; height: 150px;" />
+                        <div class="actions" v-if="selectedImage?.Id == slotProps.option.Id">
+                            <Button icon="pi pi-trash" @click="deleteImage(slotProps.option)" />
+                        </div>
+                    </div>
+                </template>
+            </Listbox>
         </div>
     </div>
 </template>
@@ -56,43 +66,41 @@ const deleteImage = (image: Image) => {
 
 <style scoped>
 .reel {
-    width: 100%;
+    width: 275px;
     height: 100%;
     overflow: scroll;
     margin-left: 10px;
     margin-right: 10px;
+
+    display: flex;
+    flex-direction: column;
 }
 
-.reel .reel-image {
-    position: relative;
-    margin: 0px;
-    margin-bottom: 20px;
+.reel .reel-header {
+    height: 3rem;
+    line-height: 3rem;
+}
+
+.reel .reel-body {
     width: calc(100% - 20px);
+    height: 100%;
+    /* display: flex; */
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    /* border: solid 1px red; */
 }
 
-.reel .reel-image img {
-    width: 100%;
-}
+.actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-left: 10px;
+    margin-right: 10px;
 
-.reel .reel-image .reel-image-toolbox {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
-    padding: 10px;
-    display: none;
-    width: 100%;
-
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-.reel .reel-image.selected .reel-image-toolbox {
-    display: block;
-}
-
-.reel .reel-image .reel-image-toolbox .btn {
-    border: solid 1px hsla(160, 100%, 37%, 1);
-    height: 42px;
-    padding: 0px 45px;
-    font-size: 20px;
 }
 </style>

@@ -13,7 +13,7 @@ const props = defineProps({
 })
 
 
-const fps = ref(10);
+const fps = ref(30);
 const currentImage = ref(0)
 
 setInterval(() => {
@@ -26,10 +26,10 @@ setInterval(() => {
 
 const imagesSorted = computed(() => {
   return props.images.sort((a, b) => {
-    if (a.created_at > b.created_at) {
+    if (a.CreatedAt > b.CreatedAt) {
       return 1
     }
-    if (a.created_at < b.created_at) {
+    if (a.CreatedAt < b.CreatedAt) {
       return -1
     }
     return 0
@@ -38,18 +38,21 @@ const imagesSorted = computed(() => {
 
 </script>
 
+
 <template>
-  <div class="camera">
-    <div class="camera-video">
-      <div style="position: relative;">
-        <img :src="imagesSorted[currentImage].data" />
+  <div class="player">
+    <div class="player-video">
+      <div class="player-container" style="position: relative;">
+        <img class="player-img" v-for="(i, index) in imagesSorted" :src="i.Url"
+          :class="{ visible: index == currentImage }" />
       </div>
     </div>
   </div>
 </template>
   
+
 <style scoped>
-.camera {
+.player {
   width: 100%;
   height: 100%;
   background-color: #212121;
@@ -62,7 +65,7 @@ const imagesSorted = computed(() => {
   position: relative;
 }
 
-.camera .camera-error-container {
+.player .player-error-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -75,7 +78,7 @@ const imagesSorted = computed(() => {
 
 }
 
-.camera .camera-error-container .camera-error {
+.player .player-error-container .player-error {
 
   width: 250px;
   height: 250px;
@@ -86,6 +89,24 @@ const imagesSorted = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.player .player-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.player .player-container .player-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  visibility: hidden;
+}
+
+.player .player-container .player-img.visible {
+  visibility: visible;
 }
 </style>
   
