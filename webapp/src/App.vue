@@ -2,17 +2,19 @@
   <ConfirmDialog></ConfirmDialog>
 
 
-  <div class="grid nested-grid h-screen" @dblclick="stopDblClick">
-    <div class="col-12">
+  <div class="app-container" @dblclick="stopDblClick">
+    <div class="header">
       <Navigation @onPlayButtonPressed="onButtonPlayPressed" @onTakeImageButtonPressed="onButtonTakeImagePressed"
         @onNewButtonPressed="onNewButtonPressed" />
     </div>
-    <div class="col flex h-full" style="max-height: calc(100% - 84px) !important;">
-      <Camera v-if="showCamera && projectStore.Project.value" :lastImage="projectStore.Project.value.images[0]" />
-      <Player v-if="showPlayer && projectStore.Project.value" :images="projectStore.Project.value.images" />
-    </div>
-    <div class="h-full" style="max-height: calc(100% - 84px) !important;">
-      <Reel v-if="projectStore.Project.value" :images="projectStore.Project.value.images" @delete="onButtonPressedDeleteImage" />
+    <div class="content">
+      <div class="left" style="max-height: calc(100% - 84px) !important;">
+        <Camera v-if="showCamera && projectStore.Project.value" :lastImage="projectStore.Project.value.images[0]" />
+        <Player v-if="showPlayer && projectStore.Project.value" :images="projectStore.Project.value.images" />
+      </div>
+      <div class="right" style="max-height: calc(100% - 84px) !important;">
+        <Reel v-if="projectStore.Project.value" :images="projectStore.Project.value.images" @delete="onButtonPressedDeleteImage" />
+      </div>
     </div>
   </div>
 
@@ -121,19 +123,15 @@ const stopDblClick = (e: any) => {
   /* touch-action: none; */
 }
 
-.content-container {
+.content {
   width: 100%;
   height: 100%;
 
   display: flex;
 }
 
-.content-container .content-container-item {
-  height: 100%;
-  width: 100%;
-}
 
-.content-container .content-container-item.left {
+.content .left {
   width: 100%;
   height: 100%;
 
@@ -141,7 +139,7 @@ const stopDblClick = (e: any) => {
   flex-direction: column;
 }
 
-.content-container .content-container-item.right {
+.content .right {
   width: 300px;
   height: 100%;
 }
