@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"os"
 	"path"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/harmoniemand/stopmotion/internal/configuration"
 	"github.com/harmoniemand/stopmotion/internal/models"
@@ -40,7 +42,7 @@ func (h *ImagesHandler) GetImageAsFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imgID := mux.Vars(r)["id"]
+	imgID := mux.Vars(r)["img_id"]
 	if imgID == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		_, e := w.Write([]byte("id is required"))
@@ -82,29 +84,14 @@ func (h *ImagesHandler) PostImage(w http.ResponseWriter, r *http.Request) {
 
 	defer file.Close()
 
-	projectID := r.FormValue("project_id")
-	if projectID == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		_, e := w.Write([]byte("project_id is required"))
-		if e != nil {
-			log.Errorf("Error writing response: %v", e)
-		}
-		return
-	}
-
+	projectID := mux.Vars(r)["project_id"]
 	imgDir := path.Join("_images/", projectID)
-
-	imgID := r.FormValue("id")
-	if imgID == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = w.Write([]byte("id is required"))
-		return
-	}
+	imgID := uuid.New().String()
 
 	img := models.Image{
-		ID:        r.FormValue("id"),
+		ID:        imgID,
 		CreatedAt: time.Now().Format("2006-01-02 15:04:05"),
-		Filename:  r.FormValue("id") + ".png",
+		Filename:  imgID + ".png",
 	}
 
 	// save image to disk
@@ -174,9 +161,63 @@ func (h *ImagesHandler) PostImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	json, err := json.Marshal(img)
+	if err != nil {
+		log.Errorf("Error marshalling json: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_, e := w.Write([]byte("Internal server error"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
-	_, err = w.Write([]byte("image saved"))
+	_, err = w.Write(json)
 	if err != nil {
 		log.Errorf("Error writing response: %v", err)
 	}
+}
+
+func (h *ImagesHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
+	log.Debug("The DeleteImage handler is executing!")
+
+	projectID := mux.Vars(r)["project_id"]
+	imgID := mux.Vars(r)["img_id"]
+
+	imgDir := path.Join("_images/", projectID)
+	imgPath := path.Join(imgDir, imgID+".png")
+
+	err := os.Remove(imgPath)
+	if err != nil {
+		log.Errorf("Error removing image: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_, e := w.Write([]byte("Internal server error"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
+	}
+
+	log.Debugf("db connection: %v", h.config.DBConnection)
+	client, err := mongo.Connect(r.Context(), options.Client().ApplyURI(h.config.DBConnection))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, e := w.Write([]byte("Internal server error"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
+		return
+	}
+
+	collection := client.Database(h.config.DatabaseName).Collection("projects")
+	_, err = collection.UpdateOne(r.Context(), bson.M{"id": projectID}, bson.M{"$pull": bson.M{"images": bson.M{"id": imgID}}})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, e := w.Write([]byte("Internal server error"))
+		if e != nil {
+			log.Errorf("Error writing response: %v", e)
+		}
+		return
+	}
+
 }

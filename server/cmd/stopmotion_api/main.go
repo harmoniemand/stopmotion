@@ -99,10 +99,11 @@ func server() error {
 	router.Path(fmt.Sprintf("%v/projects", config.BasePath)).HandlerFunc(projectsHandler.PostProject).Methods("POST")
 
 	imageHandler := handlers.NewImagesHandler(&config)
-	router.Path(fmt.Sprintf("%v/images", config.BasePath)).HandlerFunc(options).Methods("OPTIONS")
-	router.Path(fmt.Sprintf("%v/images", config.BasePath)).HandlerFunc(imageHandler.PostImage).Methods("POST")
-	router.Path(fmt.Sprintf("%v/images/{project_id}/{id}", config.BasePath)).HandlerFunc(options).Methods("OPTIONS")
-	router.Path(fmt.Sprintf("%v/images/{project_id}/{id}", config.BasePath)).HandlerFunc(imageHandler.GetImageAsFile).Methods("GET")
+	router.Path(fmt.Sprintf("%v/projects/{project_id}/images", config.BasePath)).HandlerFunc(options).Methods("OPTIONS")
+	router.Path(fmt.Sprintf("%v/projects/{project_id}/images", config.BasePath)).HandlerFunc(imageHandler.PostImage).Methods("POST")
+	router.Path(fmt.Sprintf("%v/projects/{project_id}/images/{img_id}", config.BasePath)).HandlerFunc(options).Methods("OPTIONS")
+	router.Path(fmt.Sprintf("%v/projects/{project_id}/images/{img_id}", config.BasePath)).HandlerFunc(imageHandler.GetImageAsFile).Methods("GET")
+	router.Path(fmt.Sprintf("%v/projects/{project_id}/images/{img_id}", config.BasePath)).HandlerFunc(imageHandler.DeleteImage).Methods("DELETE")
 
 	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
 

@@ -178,6 +178,9 @@ linters-settings:
     # Otherwise, only methods that take `*testing.T`, `*testing.B`, and `testing.TB` as arguments are checked.
     # Default: false
     all: true
+  
+  lll:
+    line-length: 150
 
 
 linters:
