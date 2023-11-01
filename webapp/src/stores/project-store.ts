@@ -8,8 +8,8 @@ class ProjectStore {
 
     private static instance: ProjectStore;
 
-    baseURL = "http://localhost:8080"
-    // baseURL = "https://stopmotion.sfzprojekt.de"
+    // baseURL = "http://localhost:8080"
+    baseURL = "https://stopmotion.sfzprojekt.de"
     Project = ref<Project | null>(null)
 
     private constructor() {
